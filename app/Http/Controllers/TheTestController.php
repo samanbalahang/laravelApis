@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\theTest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ExtrasController;
+use Illuminate\Support\Facades\DB;
 
 class TheTestController extends Controller
 {
@@ -40,7 +41,10 @@ class TheTestController extends Controller
         // array_push($createFinalexport,$newarray);
         // dd($thedata);
         $myJSON = json_encode($thedata, JSON_UNESCAPED_UNICODE);
+
         echo $myJSON;
+
+
     }
 
     /**

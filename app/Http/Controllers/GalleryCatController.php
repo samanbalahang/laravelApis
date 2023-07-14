@@ -167,9 +167,31 @@ class GalleryCatController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(GalleryCat $galleryCat)
+    public function destroy(Request $request,GalleryCat $galleryCat,$id)
     {
         //
+        $extrasController = new ExtrasController;
+        $thedata = $this->getconnection();
+        $unsetMediaReq = $request;
+        $thePost= GalleryCat::find($id);
+        if($thePost->count() != 0){
+            $thePost->delete();
+            return json_encode($thedata, JSON_UNESCAPED_UNICODE);
+        }
+
+    }
+    public function destroymedia(Request $request,GalleryCat $galleryCat,$id)
+    {
+        //
+        $extrasController = new ExtrasController;
+        $thedata = $this->getconnection();
+        $unsetMediaReq = $request;
+        $thePost= mediaCollection::where("media_id",$id)->first();
+        if($thePost->count() != 0){
+            $thePost->delete();
+            return json_encode($thedata, JSON_UNESCAPED_UNICODE);
+        }
+
     }
 
     /*---------------------------------

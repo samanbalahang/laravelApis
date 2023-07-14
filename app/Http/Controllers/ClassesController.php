@@ -186,8 +186,15 @@ class ClassesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Classes $classes)
+    public function destroy(Request $request,Classes $classes,$url)
     {
-        //
+        $extrasController = new ExtrasController;
+        $thedata = $this->getconnection();
+        $unsetMediaReq = $request;
+        $thePost= Classes::where("uri",$url)->first();
+        if($thePost->count() != 0){
+            $thePost->delete();
+            return json_encode($thedata, JSON_UNESCAPED_UNICODE);
+        }
     }
 }

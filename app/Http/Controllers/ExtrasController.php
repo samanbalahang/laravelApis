@@ -46,7 +46,6 @@ class ExtrasController extends Controller
         |            بر میگرداند
         */
     public function isDatabaseConected(){
-
         return $this->checkConnection()["situation"];
     }
 
@@ -94,6 +93,7 @@ class ExtrasController extends Controller
      }
 
     // تبدیل عکس 64 بیت به عکس معمولی
+  
     function base64_to_jpeg($base64_string, $output_file,$photoname="") {
         // تبدیل بیس 64 به عکس
         // open the output file for writing
@@ -232,6 +232,7 @@ class ExtrasController extends Controller
 
     }
 
+    // ذخیره فایل مدیا
     public function saveMediaFile($request,$photo,$photoname,$photoAddress){
         $photo = "";
         $photo = $request[$photo];
@@ -249,10 +250,193 @@ class ExtrasController extends Controller
         }
     }
 
+    // فانکشن اتصال به بانک زیبال
+ 
+    public function StartZibal(){
+        $merchant = env("merchant", "zibal");
+        $parameters = [
+            "merchant"      =>$merchant,
+            "amount"        =>20000,
+            "callbackUrl"   =>"https://padhanis.com/laravel/api/payment",
+            "description"   =>"testpayment",
+            "orderId"       =>"mytestId",
+            "mobile"        =>"09224194485",
+            "ledgerId"      =>"ledgerId",
+            "linkToPay"     =>0,
+            "sms"           =>0
+        ];
+        $parameters = json_encode($parameters, JSON_UNESCAPED_UNICODE);
+        // dd( $parameters);
+        // $parameters = "{
+        //     'merchant'      :'{$merchant}',
+        //     'amount'        :20000,
+        //     'callbackUrl'   :'https://padhanis.com/laravel/api/payment',
+        //     'description'   :'testpayment',
+        //     'orderId'       :'mytestId',
+        //     'mobile'        :'09224194485',
+        //     'ledgerId'      :'ledgerId',
+        //     'linkToPay'     :0,
+        //     'sms'           :0
+        // }";
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer 7ef1ad4f147c4f7e952a0e5db8f57dab',
+        ];
+        $url = 'https://gateway.zibal.ir/v1/request';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        // curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch , CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        // curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($parameters));
+        curl_setopt($ch, CURLOPT_POSTFIELDS,$parameters);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response  = curl_exec($ch);
+        curl_close($ch);
+        return json_decode($response);
+        
+    }
+    
+    public function ZibalResult($code){
+        switch ($code) {
+            case 100:
+                $output = "با موفقیت تایید شد.";
+                break;
+            case 102:
+                $output = "merchantیافت نشد.";
+                break;
+            case 103:
+                $output = "merchantغیرفعال";
+                break;
+            case 104:
+                $output = "merchantنامعتبر";
+                break;
+            case 105:
+                $output = "amountبایستی بزرگتر از 1,000 ریال باشد.";
+                break;
+            case 106:
+                $output = "callbackUrlنامعتبر می‌باشد. (شروع با http و یا https)";
+                break;
+            case 113:
+                $output = "amountمبلغ تراکنش از سقف میزان تراکنش بیشتر است.";
+                break;
+            case 201:
+                $output = "قبلا تایید شده";
+                break;
+            case 202:
+                $output = "سفارش پرداخت نشده یا ناموفق بوده است.";
+                break;
+            case 203:
+                $output = "trackIdنامعتبر می‌باشد.";
+                break;
+            default:
+                $output = "خطا در لیست نیست";
+                break;
+        }
+        return $output;
+    }
+
+    public function ZibalPaymentStart($trackId="3252753083"){
+        return "https://gateway.zibal.ir/start/".$trackId;
+
+    }
+
+    public function Zibalverify($merchant= "zibal",$trackId){
+        // $merchant = env("merchant", "zibal");
+        $url = 'https://gateway.zibal.ir/v1/verify';
+        $parameters = '{
+            "merchant" : "zibal",
+            "trackId"  :  "3252753083"    
+        }';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_POST, 1);
+        // curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($parameters));
+        curl_setopt($ch, CURLOPT_POSTFIELDS,$parameters);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response  = curl_exec($ch);
+        curl_close($ch);
+        return json_decode($response);
+
+
+    }
+
+    public function ZibalPaymentStatus($statusCode=3){
+        switch ($statusCode) {
+            case -1:
+                $statusDesc = "در انتظار پردخت";
+                break;
+            case -2:
+                $statusDesc = "	خطای داخلی";
+                break;
+            case 1:
+                $statusDesc = "پرداخت شده - تاییدشده";
+                break;
+            case 2:
+                $statusDesc = "پرداخت شده - تاییدنشده";
+                break;
+            case 3:
+                $statusDesc = "لغوشده توسط کاربر";
+                break;
+            case 4:
+                $statusDesc = "‌شماره کارت نامعتبر می‌باشد.";
+                break;
+            case 5:
+                $statusDesc = "‌موجودی حساب کافی نمی‌باشد.";
+                break;
+            case 6:
+                $statusDesc = "رمز واردشده اشتباه می‌باشد.";
+                break;
+            case 7:
+                $statusDesc = "‌تعداد درخواست‌ها بیش از حد مجاز می‌باشد.";
+                break;
+            case 8:
+                $statusDesc = "‌تعداد پرداخت اینترنتی روزانه بیش از حد مجاز می‌باشد.";
+                break;
+            case 9:
+                $statusDesc = "مبلغ پرداخت اینترنتی روزانه بیش از حد مجاز می‌باشد.";
+                break;
+            case 10:
+                $statusDesc = "‌صادرکننده‌ی کارت نامعتبر می‌باشد.";
+                break;
+            case 11:
+                $statusDesc = "‌خطای سوییچ";
+                break;
+            case 12:
+                $statusDesc ="کارت قابل دسترسی نمی‌باشد.";
+                break;
+            
+            default:
+                $statusDesc = "کد وضعیت شناسایی نشد!";
+                break;
+        }
+        return $statusDesc;
+    }
 
 
 
-    public function index()
+    public function postToZibal($path, $parameters)
+        {
+            define("ZIBAL_MERCHANT_KEY","zibal");
+            define("ZIBAL_CALLBACK_URL","http://yourapiurl.com/callback.php");
+
+            $url = 'https://gateway.zibal.ir/v1/'.$path;
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS,json_encode($parameters));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $response  = curl_exec($ch);
+            curl_close($ch);
+            return json_decode($response);
+        }
+
+
+
+   
+        public function index()
     {
         //
     }

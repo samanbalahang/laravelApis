@@ -26,6 +26,7 @@ use App\Http\Controllers\TuterController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ThePublicController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,8 +45,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 // برای تست
 Route::resource('/test',                    TheTestController::class);
-// برای تست
-Route::resource('/home-screen',             [thepublicController::class,"index"]);
+// صفحه نخست
+Route::get('/home-screen',                  [thepublicController::class,"index"]);
 // برای خبر
 Route::get('/news',                         [PostController::class,"index"]);
 // برای خبر
@@ -133,10 +134,53 @@ Route::get('/news-article',                 [PostController::class,"newsArticle"
 Route::resource('/tutor',                   TuterController::class);
 //سوالات متداول
 Route::resource('/faq',                     FaqController::class);
-// انواع پست
-Route::get('/{uri?}',                       [PostController::class,"postUri"])->name('post.uri');
+//سوالات قوانین و مقررات
+Route::resource('/terms-conditions',        PostController::class);
+//درباره ما
+Route::resource('/about-us',                PostController::class);
+//تماس با ما
+Route::resource('/contact-us',              PostController::class);
+//ویرایش کلاس
+Route::resource('/class}',                  ClassesController::class);
+//ویرایش کلاس
+Route::resource('/collection',               CollectionController::class);
+// ارسال درخواست برای پرداخت
+Route::post('/payment',                     [PaymentController::class,"index"]);
+Route::get('/payment',                      [PaymentController::class,"getPaymentResult"]);
+Route::post('/payment-result',              [PaymentController::class,"result"]);
+Route::post('/payment-verify',              [PaymentController::class,"verify"]);
+
+
+
+
+
 
 Route::group(['prefix' => 'admin-panel'],function(){
 });
+// صفحه نخست ارسال داده ها
+Route::post('/home-screen',                  [thepublicController::class,"store"]);
+// ارسال صفحه قوانین و مقررات
+Route::post('/terms-conditions',             [PostController::class,"store"]);
+// ارسال صفحه درباره ما
+Route::post('/about-us',                     [PostController::class,"store"]);
+// ارسال صفحه تماس با ما
+Route::post('/contact-us',                   [PostController::class,"store"]);
+// ارسال پست
+Route::delete('/post/{url}',                 [PostController::class,"destroy"]);
+// ارسال سوالات متداول
+Route::post('/faq',                          [PostController::class,"store"]);
+//حذف کلاس
+Route::delete('/class/{url}',                [ClassesController::class,"destroy"]);
+// حذف گالری
+Route::delete('/gallery_cat/{id}',           [GalleryCatController::class,"destroy"]);
+// حذف مدیا از گالی-ری
+Route::delete('/gallery_cat_media/{id}',     [GalleryCatController::class,"destroymedia"]);
 
-Route::resource('/home-screen',             thepublicController::class);
+
+
+
+
+
+// انواع پست
+Route::get('/{uri?}',                       [PostController::class,"postUri"])->name('post.uri');
+

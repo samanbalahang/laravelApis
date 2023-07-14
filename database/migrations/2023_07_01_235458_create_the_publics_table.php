@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('the_publics', function (Blueprint $table) {
             $table->id();
+            $table->string("welcome_text")->nullable();
+            $table->string("employment_text")->nullable();
+            $table->string("employment_character")->nullable();
+            $table->string("advertisement_right_banner")->nullable();
+            $table->string("gallery_character")->nullable();
+            $table->string("advertisement_left_banner")->nullable();
+            $table->string("gallery_pic")->nullable();
+            $table->string("advertisement_banner")->nullable();
+            $table->string("welcome_character")->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

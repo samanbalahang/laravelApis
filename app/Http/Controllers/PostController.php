@@ -107,19 +107,35 @@ class PostController extends Controller
 
     public function theposturi(Request $request,$uri){
         // براساس آدرس صفحه
+        // $fulluri = $_SERVER["REQUEST_URI"];
+        // $posttype =$this->posttype($request,$uri);
+        // $posttypeLength = strlen($posttype);
+        // $pageuri = substr($fulluri,$posttypeLength);
+        // if(strpos($pageuri,"/") == 0){
+        //      $fulluri = substr($fulluri,1);
+        // }
+        // // $pageuri = substr($fulluri,strpos($fulluri,"/"));
+        // $pageuri = substr($pageuri,strpos($pageuri,"/"));
+        // if(substr($pageuri,0,1) == "/"){
+        //     $pageuri = substr($pageuri,1);
+        // }
+        // return $pageuri;
         $fulluri = $_SERVER["REQUEST_URI"];
-        $posttype =$this->posttype($request,$uri);
-        $posttypeLength = strlen($posttype);
-        $pageuri = substr($fulluri,$posttypeLength);
-        if(strpos($pageuri,"/") == 0){
-             $fulluri = substr($fulluri,1);
+        $fulluri = urldecode($fulluri);
+        if(strpos($fulluri,"/") == 0){
+         $fulluri = substr($fulluri,1);
         }
-        // $pageuri = substr($fulluri,strpos($fulluri,"/"));
-        $pageuri = substr($pageuri,strpos($pageuri,"/"));
-        if(substr($pageuri,0,1) == "/"){
-            $pageuri = substr($pageuri,1);
+        if(strpos($fulluri,"/") != false || strpos($fulluri,"/") ==0){
+             // dd(strpos($fulluri,"/"));
+            if(strpos($fulluri,"laravel") != false || strpos($fulluri,"laravel") == 0){
+                 $pageuri = substr($fulluri,8);
+                 if(strpos($pageuri,"api") != false || strpos($pageuri,"api") == 0){
+                     $pageuri = substr($pageuri,4);
+                 }
+
+            }
         }
-        return $pageuri;
+         return $pageuri;
     }
 
     public function getconnection($request= "",$uri = ""){
@@ -176,6 +192,62 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+
+        $postUri = $this->theposturi($request,"");
+        $theposttypes = $this->posttype($request,"");
+        if($postUri == "terms-conditions"){
+            $request["postTypeId"] = 1;
+            $request["collection_id"] = 0;
+            $request["uri"] = $postUri;
+            $request["title"] = "قوانین و مقررات";
+            $request["description"] = "";
+            $request["content"] = $request["text"];
+            $request["galleryId"] = 0;
+            $request["likes"] = 0;
+            $request["views"] = 0;
+        }
+        if($postUri == "about-us"){
+            $request["postTypeId"] = 1;
+            $request["collection_id"] = 0;
+            $request["uri"] = $postUri;
+            $request["title"] = "درباره ما";
+            $request["description"] = $request["text_1"];
+            $request["content"] = $request["text_2"];
+            $request["photo"] = $request["pic_1"];
+            $request["galleryId"] = 0;
+            $request["likes"] = 0;
+            $request["views"] = 0;
+        }
+        if($postUri == "contact-us"){
+            $request["postTypeId"] = 1;
+            $request["collection_id"] = 0;
+            $request["uri"] = $postUri;
+            $request["title"] = "تماس با ما";
+            $request["description"] = "";
+            $request["content"] = $request["text"];
+            $request["photo"] = $request["character"];
+            $request["galleryId"] = 0;
+            $request["likes"] = 0;
+            $request["views"] = 0;
+        }
+        if($postUri == "faq"){
+            $request["postTypeId"] = 1;
+            $request["collection_id"] = 0;
+            $request["uri"] = $postUri;
+            $request["title"] = "سوالات متداول";
+            $request["description"] = "";
+            $contentThis =
+            ["question_1" => $request["question_1"]
+            ,"answer_1" => $request["answer_1"],
+            "question_2" => $request["question_2"]
+            ,"answer_2" => $request["answer_2"],
+            "question_3" => $request["question_3"]
+            ,"answer_3" => $request["answer_3"]];
+            $request["content"] = json_encode($contentThis, JSON_UNESCAPED_UNICODE);
+            $request["galleryId"] = 0;
+            $request["likes"] = 0;
+            $request["views"] = 0;
+        }
         // return "fd";
         // if(!file_exists("../uploads/test/")){
         //     mkdir("../uploads/test/", 0700);
@@ -189,11 +261,16 @@ class PostController extends Controller
         $photo = "";
         if(isset($request->photo)){
             $photo = $request->photo;
+            $photoAddress = "../uploads/post/";
+            $photoname    =  $extrasController->imagefilename();
+            $thefile      =  $photoAddress.$photoname.".png";
+            $theTextFile  =  $photoAddress.$photoname.".txt"; 
+            $savedAddress = "/uploads/post/";
+            $photoOnDB    =  $savedAddress.$photoname.'.jpg';
+        }else{
+            $photoOnDB    = "";
         }
-        $photoAddress = "../uploads/post/";
-        $photoname    =  $extrasController->imagefilename();
-        $thefile      =  $photoAddress.$photoname.".png";
-        $theTextFile  =  $photoAddress.$photoname.".txt"; 
+
         // if($myfile = fopen("../uploads/newfile.txt", "w")){
         //     // echo "hi ";
         // }
@@ -233,6 +310,27 @@ class PostController extends Controller
         if($this->isDbconected($request) == "OK"){
             $unsetMediaReq = $request;
             unset($unsetMediaReq["photo"]);
+            if($postUri == "terms-conditions"){
+                unset($unsetMediaReq["text"]);
+            }
+            if($postUri == "about-us"){
+                unset($unsetMediaReq["pic_1"]);
+                unset($unsetMediaReq["pic_2"]);
+                unset($unsetMediaReq["text_1"]);
+                unset($unsetMediaReq["text_2"]);
+            }
+            if($postUri == "contact-us"){
+                unset($unsetMediaReq["character"]);
+                unset($unsetMediaReq["text"]);
+            }
+            if($postUri == "faq"){
+                unset($unsetMediaReq["question_1"]);
+                unset($unsetMediaReq["answer_1"]);
+                unset($unsetMediaReq["question_2"]);
+                unset($unsetMediaReq["answer_2"]);
+                unset($unsetMediaReq["question_3"]);
+                unset($unsetMediaReq["answer_3"]);
+            }
 
             $newreq = $extrasController->jsonRequestToObj($unsetMediaReq);
             // return $newreq;
@@ -250,7 +348,7 @@ class PostController extends Controller
                 $newPost->title          =  $objectOfRequesr->title;
                 $newPost->description    =  $objectOfRequesr->description;
                 $newPost->content        =  $objectOfRequesr->content;
-                $newPost->photo          =  $savedAddress.$photoname.'.jpg';
+                $newPost->photo          =  $photoOnDB;
                 $newPost->galleryId      =  $objectOfRequesr->galleryId;
                 $newPost->likes          =  $objectOfRequesr->likes;
                 $newPost->views          =  $objectOfRequesr->views;              
@@ -348,10 +446,18 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post,$url)
     {
         //
-        echo " destroy";
+        $extrasController = new ExtrasController;
+        $thedata = $this->getconnection();
+        $unsetMediaReq = $post;
+        $thePost= Post::where("uri",$url)->first();
+        if($thePost->count() != 0){
+            $thePost->delete();
+            return json_encode($thedata, JSON_UNESCAPED_UNICODE);
+        }
+        // echo " destroy";
     }
 
     public function postUri(Request $request,$uri = "")
