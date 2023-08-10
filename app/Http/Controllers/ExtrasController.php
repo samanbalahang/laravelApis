@@ -253,6 +253,9 @@ class ExtrasController extends Controller
     // فانکشن اتصال به بانک زیبال
  
     public function StartZibal(){
+        /* in .env
+        $merchant = "6499be0ecbbc27000c189eeb";
+        */
         $merchant = env("merchant", "zibal");
         $parameters = [
             "merchant"      =>$merchant,
@@ -344,10 +347,12 @@ class ExtrasController extends Controller
     public function Zibalverify($merchant= "zibal",$trackId){
         // $merchant = env("merchant", "zibal");
         $url = 'https://gateway.zibal.ir/v1/verify';
-        $parameters = '{
-            "merchant" : "zibal",
-            "trackId"  :  "3252753083"    
-        }';
+        $parameters = ["merchant"=>$merchant,"trackId"=>$trackId];
+        $parameters = json_encode($parameters, JSON_UNESCAPED_UNICODE);
+        // $parameters = '{
+        //     "merchant" : "zibal",
+        //     "trackId"  :  "3252753083"    
+        // }';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
@@ -440,6 +445,21 @@ class ExtrasController extends Controller
     {
         //
     }
+
+
+    
+//   آپلود ساده فایل
+  public function simpleFileUpload($request,$main_img="main_img",$address="uploads/posts/"){
+    $file = $request->file($main_img);
+    $extension = $file->getClientOriginalExtension(); // getting image extension
+    $filename =$this->imagefilename(6).'.'.$extension;
+    if($file->move($address, $filename)){
+        return true;
+    }else{
+        return false;
+    }
+}
+  
 
     /**
      * Show the form for creating a new resource.

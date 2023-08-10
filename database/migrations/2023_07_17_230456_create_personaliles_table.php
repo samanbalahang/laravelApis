@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('psychological_tests', function (Blueprint $table) {
+        Schema::create('personaliles', function (Blueprint $table) {
             $table->id();
-            $table->string("title")->nullable();
-            $table->tinyInteger("status")->nullable();
-            $table->string("enter_link")->nullable();
-            $table->softDeletes();
+            
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('psychological_tests');
+        Schema::dropIfExists('personaliles');
     }
 };

@@ -27,6 +27,8 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ThePublicController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PsychologicalTestController;
+use App\Http\Controllers\AssistantUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -143,12 +145,19 @@ Route::resource('/contact-us',              PostController::class);
 //ویرایش کلاس
 Route::resource('/class}',                  ClassesController::class);
 //ویرایش کلاس
-Route::resource('/collection',               CollectionController::class);
+Route::resource('/collection',              CollectionController::class);
 // ارسال درخواست برای پرداخت
 Route::post('/payment',                     [PaymentController::class,"index"]);
 Route::get('/payment',                      [PaymentController::class,"getPaymentResult"]);
 Route::post('/payment-result',              [PaymentController::class,"result"]);
 Route::post('/payment-verify',              [PaymentController::class,"verify"]);
+
+
+// آزمون روان شناسی
+Route::resource('/assistans/psychological-test',      PsychologicalTestController::class);
+Route::resource('/assistants/info',                   AssistantUserController::class);
+Route::post('/assistants/update/info',                [AssistantUserController::class,"updateInfo"]);
+
 
 
 
@@ -175,6 +184,15 @@ Route::delete('/class/{url}',                [ClassesController::class,"destroy"
 Route::delete('/gallery_cat/{id}',           [GalleryCatController::class,"destroy"]);
 // حذف مدیا از گالی-ری
 Route::delete('/gallery_cat_media/{id}',     [GalleryCatController::class,"destroymedia"]);
+
+
+
+
+// USERPANEL
+Route::get('/user/info',                    [UserProfileController::class,"info"])->name('user.info');
+Route::post('/user/info',                   [UserProfileController::class,"editinfo"])->name('user.editinfo');
+//--  Personal Files
+Route::post('/user/personal-file',          [UserProfileController::class,"personalFile"])->name('user.personalFile');
 
 
 

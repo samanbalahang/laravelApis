@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PsychologicalTest;
 use Illuminate\Http\Request;
+use App\Http\Controllers\ExtrasController;
 
 class PsychologicalTestController extends Controller
 {
@@ -12,7 +13,16 @@ class PsychologicalTestController extends Controller
      */
     public function index()
     {
-        //
+        $theTest = new PsychologicalTest;
+        $extrasController = new ExtrasController;
+        $thedata = $extrasController->checkConnection(); 
+        if($theTest::exists()){
+            return json_encode($theTest, JSON_UNESCAPED_UNICODE);
+        }else{
+            $thedata["situation"] = "False";
+            $thedata["message"] = "گالری پیدا نشد";
+            return json_encode($thedata, JSON_UNESCAPED_UNICODE);
+        }
     }
 
     /**
